@@ -1,0 +1,34 @@
+#dual-subtitle-overlay {
+  text-align: center;
+  max-width: 80%;
+  font-family: sans-serif;
+}
+#primary-subtitle {
+  margin-bottom: 4px;
+  cursor: text;
+  user-select: text;
+}
+#secondary-subtitle {
+  color: yellow;
+  font-size: 18px;
+  cursor: text;
+  user-select: text;
+}
+
+.subtitle-overlay {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 24px;
+  padding: 6px 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+  pointer-events: none;
+  user-select: text;
+  font-family: sans-serif;
+  text-align: center;
+  max-width: 80%;
+  cursor: text;
+}
