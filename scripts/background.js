@@ -15,11 +15,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           params.response.url.includes("timedtext") &&
           params.response.mimeType.includes("json")
         ) {
-          console.log("[TimedText URL]", params.response.url);
+          // console.log("[TimedText URL]", params.response.url);
 
           const res = await fetch(params.response.url);
           const data = await res.json();
-          console.log("[TimedText JSON]", data);
+          // console.log("[TimedText JSON]", data);
 
           chrome.tabs.sendMessage(sender.tab.id, {
           action: "processSubs",

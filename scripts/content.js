@@ -7,7 +7,23 @@ function showSubtitles() {
   if (!subtitleBox) {
     subtitleBox = document.createElement("div");
     subtitleBox.id = "custom-subtitles";
+
+    const dragHandle = document.createElement("div");
+    dragHandle.id = "drag-handle";
+    dragHandle.textContent = "☰";
+
+    const textBackground = document.createElement("div");
+    const textContainer = document.createElement("div");
+    textBackground.id = "subtitle-background";
+    textContainer.id = "subtitle-text";
+
+    subtitleBox.appendChild(dragHandle);
+    subtitleBox.appendChild(textBackground);
+
+    textBackground.appendChild(textContainer);
+
     document.body.appendChild(subtitleBox);
+    enableDrag(subtitleBox, dragHandle);
   }
   subtitleBox.style.display = "block";
 }
@@ -24,13 +40,41 @@ function updateSubtitle(video) {
       currentTimeMs <= ev.tStartMs + ev.dDurationMs
   );
 
-  if (match && match !== activeSub) {
-    subtitleBox.innerText = match.segs.map((s) => s.utf8).join("");
+  const textContainer = subtitleBox?.querySelector("#subtitle-text");
+
+  if (match && match !== activeSub && textContainer) {
+    textContainer.innerText = match.segs.map((s) => s.utf8).join("");
     activeSub = match;
-  } else if (!match && activeSub !== null) {
-    subtitleBox.innerText = "";
+  } else if (!match && activeSub !== null && textContainer) {
+    textContainer.innerText = "";
     activeSub = null;
   }
+}
+
+function enableDrag(box, handle) {
+  let isDragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener("mousedown", function (e) {
+    isDragging = true;
+    offsetX = e.clientX - box.offsetLeft;
+    offsetY = e.clientY - box.offsetTop;
+    document.body.style.userSelect = "none";
+  });
+
+  document.addEventListener("mousemove", function (e) {
+    if (isDragging) {
+      box.style.left = `${e.clientX - offsetX}px`;
+      box.style.top = `${e.clientY - offsetY}px`;
+      box.style.transform = "none";
+    }
+  });
+
+  document.addEventListener("mouseup", function () {
+    isDragging = false;
+    document.body.style.userSelect = "auto";
+  });
 }
 
 function attachSubtitleListeners(video) {
@@ -69,17 +113,21 @@ function fetchAndProcessSubs(callback) {
 const checkAndObserve = () => {
   const btn = document.querySelector(".ytp-subtitles-button");
   if (!btn) return;
+  // New code here: new selector for value of language dropdown select menu when it is pressed
 
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (
+        // New code here: need attribute for whenever a new select is triggered from a menu
         mutation.type === "attributes" &&
         mutation.attributeName === "aria-pressed"
       ) {
+        // New code here: also need or condition to show that select menu was triggered
         const isPressed = btn.getAttribute("aria-pressed") === "true";
         if (isPressed) {
           showSubtitles();
           if (!subtitleData) {
+            // New code here: get subtitle button value of language dropdown select menu and pass it into fetchAndProcessSubs
             fetchAndProcessSubs(() => {
               showSubtitles();
             });
