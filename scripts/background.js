@@ -1,46 +1,93 @@
+let lastTimedTextUrl = null;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "fetchSubs") {
-    const tabId = sender.tab.id;
+    (async () => {
+      const tabId = sender.tab.id;
 
-    chrome.debugger.attach({ tabId }, "1.3").then(() => {
-      console.log("[Debugger] Attached via message");
+      // Case 1: Use previously captured subtitle URL from debugger
+      if (lastTimedTextUrl) {
+        try {
+          const urlObj = new URL(lastTimedTextUrl);
+          const lang = urlObj.searchParams.get("lang");
+          const tlang = urlObj.searchParams.get("tlang");
+          const currentLang = tlang || lang;
 
-      chrome.debugger.sendCommand({ tabId }, "Network.enable");
+          // First fetch
+          const subs1 = await fetch(urlObj.toString()).then(r => r.json());
+          let subs2 = null;
 
-      chrome.debugger.onEvent.addListener(async (source, method, params) => {
-        if (
-          source.tabId === tabId &&
-          method === "Network.responseReceived" &&
-          params.response.url.includes("timedtext") &&
-          params.response.mimeType.includes("json")
-        ) {
-          // console.log("[TimedText URL]", params.response.url);
+          // Second fetch if needed
+          if (currentLang !== request.selectedLanguage) {
+            urlObj.searchParams.set("tlang", request.selectedLanguage);
+            subs2 = await fetch(urlObj.toString()).then(r => r.json());
+          }
 
-          const res = await fetch(params.response.url);
-          const data = await res.json();
-          // console.log("[TimedText JSON]", data);
+          const message = {
+            action: "processSubs",
+            subContent: subs1,
+          };
+          if (subs2) message.subContent2 = subs2;
 
-          chrome.tabs.sendMessage(sender.tab.id, {
-          action: "processSubs",
-          subContent: data
-          });
-          sendResponse({ status: "OK" });
-          
+          chrome.tabs.sendMessage(sender.tab.id, message);
+          sendResponse({ status: "OK (manual fetch)" });
+        } catch (err) {
+          console.error("[Manual Fetch Error]", err);
+          sendResponse({ status: "ERROR", error: err.message });
         }
-      });
-    }).catch((err) => {
-      console.error("Failed to fetch Subtitles", err);
-      sendResponse({ status: "ERROR", error: err.message });
-    });
+        return;
+      }
 
-    return true;
+      // Case 2: Fallback — attach debugger and wait for timedtext
+      try {
+        await chrome.debugger.attach({ tabId }, "1.3");
+        console.log("[Debugger] Attached via message");
+
+        await chrome.debugger.sendCommand({ tabId }, "Network.enable");
+
+        chrome.debugger.onEvent.addListener(async (source, method, params) => {
+          if (
+            source.tabId === tabId &&
+            method === "Network.responseReceived" &&
+            params.response.url.includes("timedtext") &&
+            params.response.mimeType.includes("json")
+          ) {
+            lastTimedTextUrl = params.response.url;
+
+            const urlObj = new URL(params.response.url);
+            const urlSearch = urlObj.searchParams;
+            const lang = urlSearch.get("lang");
+            const tlang = urlSearch.get("tlang");
+            const currentLang = tlang || lang;
+
+            const subs1 = await fetch(urlObj.toString()).then(r => r.json());
+            let subs2 = null;
+
+            if (currentLang !== request.selectedLanguage) {
+              urlObj.searchParams.set("tlang", request.selectedLanguage);
+              subs2 = await fetch(urlObj.toString()).then(r => r.json());
+            }
+
+            const message = {
+              action: "processSubs",
+              subContent: subs1,
+            };
+            if (subs2) message.subContent2 = subs2;
+
+            chrome.tabs.sendMessage(tabId, message);
+            sendResponse({ status: "OK (debugger)" });
+          }
+        });
+      } catch (err) {
+        console.error("[Debugger Attach Error]", err);
+        sendResponse({ status: "ERROR", error: err.message });
+      }
+    })();
+
+    return true; // async response
   }
 });
 
-
-console.log("background_launched")
-
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Highlighter installed');
+  console.log("Highlighter installed");
 });

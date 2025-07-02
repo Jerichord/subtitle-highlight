@@ -49,7 +49,25 @@
   z-index: 9999;
   max-width: 90vw;
   box-sizing: border-box;
-  cursor: default;
+  cursor: text;
+}
+
+#custom-subtitles-2 {
+  position: fixed;
+  /* bottom: 10%;
+  left: 50%; */
+  /* transform: translateX(-50%); */
+  /* display: inline-block; */
+  /* background: rgba(0, 0, 0, 0.7); */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  user-select: text;
+  z-index: 9999;
+  max-width: 90vw;
+  box-sizing: border-box;
+  cursor: text;
 }
 
 #drag-handle {

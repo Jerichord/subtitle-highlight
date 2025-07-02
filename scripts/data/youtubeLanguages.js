@@ -1,4 +1,4 @@
-export const youtubeLanguages = [
+window.youtubeLanguages = [
   { code: 'af', name: 'Afrikaans' },
   { code: 'sq', name: 'Albanian' },
   { code: 'am', name: 'Amharic' },
