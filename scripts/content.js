@@ -47,6 +47,11 @@ function showSubtitles() {
     const textContainer2 = document.createElement("div");
     textContainer2.id = "subtitle-text-2";
 
+    const resizeHandle = document.createElement("div");
+    resizeHandle.id = "resize-handle";
+    textBackground.appendChild(resizeHandle);
+    enableResize(textBackground, resizeHandle);
+
     // here we need code to add the second subtitle box, and based on the result from fetch and process subs, we will set it to hidden or visible
     // need to add code for second subtitle here
 
@@ -129,6 +134,70 @@ function enableDrag(box, handle) {
   });
 }
 
+function enableResize(box, handle) {
+  let isDragging = false;
+  let isResizing = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  const baseWidth = 200;
+  const baseFontSize = 16;
+
+  box.style.width = `${baseWidth}px`;
+  box.style.fontSize = `${baseFontSize}px`;
+
+  // Dragging the box
+  box.addEventListener("mousedown", (e) => {
+    if (e.target === handle) return;
+    isDragging = true;
+    dragOffsetX = e.clientX - box.offsetLeft;
+    dragOffsetY = e.clientY - box.offsetTop;
+    box.style.cursor = "move";
+  });
+
+  // Resizing
+  handle.addEventListener("mousedown", (e) => {
+    e.stopPropagation();
+    isResizing = true;
+    box.style.cursor = "se-resize";
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      box.style.left = `${e.clientX - dragOffsetX}px`;
+      box.style.top = `${e.clientY - dragOffsetY}px`;
+      box.style.cursor = "move";
+    }
+
+    if (isResizing) {
+      const newWidth = Math.max(
+        e.clientX - box.getBoundingClientRect().left,
+        100
+      );
+      box.style.width = `${newWidth}px`;
+
+      const scaleFactor = newWidth / baseWidth;
+      const scaledFont = baseFontSize * scaleFactor;
+      box.style.fontSize = `${scaledFont}px`;
+
+      box.style.cursor = "se-resize";
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+    isResizing = false;
+    box.style.cursor = "text";
+  });
+
+  // Optional: when mouse re-enters the box, set it to text cursor
+  box.addEventListener("mouseenter", () => {
+    if (!isDragging && !isResizing) {
+      box.style.cursor = "text";
+    }
+  });
+}
+
 function attachSubtitleListeners(video) {
   const handler = () => updateSubtitle(video);
   video.addEventListener("timeupdate", handler);
@@ -180,14 +249,19 @@ const checkAndObserve = () => {
         const isPressed = btn.getAttribute("aria-pressed") === "true";
         if (isPressed) {
           showSubtitles();
-          if (!subtitleData) {
-            const langSelect = document.getElementById("language-select");
-            const selectedLanguage = langSelect?.value || "en";
-            console.log(selectedLanguage)
-            fetchAndProcessSubs(() => {
-              showSubtitles();
-            }, selectedLanguage);
-          }
+          const langSelect = document.getElementById("language-select");
+          // always fetch to handle sub transition
+          const selectedLanguage = langSelect?.value || "en";
+          fetchAndProcessSubs(() => {
+            showSubtitles();
+          }, selectedLanguage);
+          // if (!subtitleData) {
+          //   const langSelect = document.getElementById("language-select");
+          //   const selectedLanguage = langSelect?.value || "en";
+          //   fetchAndProcessSubs(() => {
+          //     showSubtitles();
+          //   }, selectedLanguage);
+          // }
         } else {
           hideSubtitles();
         }
@@ -200,4 +274,22 @@ const checkAndObserve = () => {
 
 checkAndObserve();
 
-console.log("content_launched");
+// needed to add this since subtitles would be on wrong language
+// const observeForSubtitleButton = () => {
+//   const observer = new MutationObserver(() => {
+//     const btn = document.querySelector(".ytp-subtitles-button");
+//     if (btn && !btn.hasAttribute("data-observed")) {
+//       btn.setAttribute("data-observed", "true");
+//       checkAndObserve();
+//     }
+//   });
+
+//   observer.observe(document.body, {
+//     childList: true,
+//     subtree: true,
+//   });
+// };
+
+// observeForSubtitleButton();
+
+
