@@ -11,6 +11,9 @@ function showSubtitles() {
     subtitleBox = document.createElement("div");
     subtitleBox.id = "custom-subtitles";
 
+    const controlsWrapper = document.createElement("div");
+    controlsWrapper.id = "subtitle-controls";
+
     const dragHandle = document.createElement("div");
     dragHandle.id = "drag-handle";
     dragHandle.textContent = "☰";
@@ -19,7 +22,8 @@ function showSubtitles() {
     if (!langSelect) {
       langSelect = document.createElement("select");
       langSelect.id = "language-select";
-      langSelect.style.margin = "5px";
+      // langSelect.style.margin = "5px";
+      langSelect.classList.add("custom-select");
 
       //Populate only once
       window.youtubeLanguages.forEach((lang) => {
@@ -52,11 +56,11 @@ function showSubtitles() {
     textBackground.appendChild(resizeHandle);
     enableResize(textBackground, resizeHandle);
 
-    // here we need code to add the second subtitle box, and based on the result from fetch and process subs, we will set it to hidden or visible
-    // need to add code for second subtitle here
-
-    subtitleBox.appendChild(dragHandle);
-    subtitleBox.appendChild(langSelect);
+    // subtitleBox.appendChild(dragHandle);
+    // subtitleBox.appendChild(langSelect);
+    controlsWrapper.appendChild(dragHandle);
+    controlsWrapper.appendChild(langSelect);
+    subtitleBox.appendChild(controlsWrapper);
     subtitleBox.appendChild(textBackground);
 
     textBackground.appendChild(textContainer);
