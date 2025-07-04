@@ -43,6 +43,7 @@ function showSubtitles() {
         fetchAndProcessSubs(null, selectedLanguage);
       });
     }
+    
 
     const textBackground = document.createElement("div");
     textBackground.id = "subtitle-background";
@@ -55,6 +56,12 @@ function showSubtitles() {
     resizeHandle.id = "resize-handle";
     textBackground.appendChild(resizeHandle);
     enableResize(textBackground, resizeHandle);
+
+    const resizeHandleX = document.createElement("div");
+    resizeHandleX.id = "resize-handle-x"; 
+    textBackground.appendChild(resizeHandleX);
+    enableHorizontalResize(textBackground, resizeHandleX); 
+
 
     // subtitleBox.appendChild(dragHandle);
     // subtitleBox.appendChild(langSelect);
@@ -156,7 +163,7 @@ function enableResize(box, handle) {
     isDragging = true;
     dragOffsetX = e.clientX - box.offsetLeft;
     dragOffsetY = e.clientY - box.offsetTop;
-    box.style.cursor = "move";
+    // box.style.cursor = "move";
   });
 
   // Resizing
@@ -170,7 +177,7 @@ function enableResize(box, handle) {
     if (isDragging) {
       box.style.left = `${e.clientX - dragOffsetX}px`;
       box.style.top = `${e.clientY - dragOffsetY}px`;
-      box.style.cursor = "move";
+      // box.style.cursor = "move";
     }
 
     if (isResizing) {
@@ -199,6 +206,36 @@ function enableResize(box, handle) {
     if (!isDragging && !isResizing) {
       box.style.cursor = "text";
     }
+  });
+}
+
+function enableHorizontalResize(box, handle) {
+  let isResizing = false;
+
+  const minWidth = 100;
+
+  handle.addEventListener("mousedown", (e) => {
+    e.stopPropagation();
+    isResizing = true;
+    document.body.style.userSelect = "none";
+    box.style.cursor = "ew-resize";
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!isResizing) return;
+
+    const newWidth = Math.max(
+      e.clientX - box.getBoundingClientRect().left,
+      minWidth
+    );
+    box.style.width = `${newWidth}px`;
+    box.style.cursor = "ew-resize";
+  });
+
+  document.addEventListener("mouseup", () => {
+    isResizing = false;
+    box.style.cursor = "text";
+    document.body.style.userSelect = "auto";
   });
 }
 
@@ -259,13 +296,6 @@ const checkAndObserve = () => {
           fetchAndProcessSubs(() => {
             showSubtitles();
           }, selectedLanguage);
-          // if (!subtitleData) {
-          //   const langSelect = document.getElementById("language-select");
-          //   const selectedLanguage = langSelect?.value || "en";
-          //   fetchAndProcessSubs(() => {
-          //     showSubtitles();
-          //   }, selectedLanguage);
-          // }
         } else {
           hideSubtitles();
         }
@@ -278,22 +308,6 @@ const checkAndObserve = () => {
 
 checkAndObserve();
 
-// needed to add this since subtitles would be on wrong language
-// const observeForSubtitleButton = () => {
-//   const observer = new MutationObserver(() => {
-//     const btn = document.querySelector(".ytp-subtitles-button");
-//     if (btn && !btn.hasAttribute("data-observed")) {
-//       btn.setAttribute("data-observed", "true");
-//       checkAndObserve();
-//     }
-//   });
 
-//   observer.observe(document.body, {
-//     childList: true,
-//     subtree: true,
-//   });
-// };
-
-// observeForSubtitleButton();
 
 
