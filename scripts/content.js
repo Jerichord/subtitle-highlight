@@ -42,11 +42,9 @@ function showSubtitles() {
       });
     }
 
-    // Subtitle container (new)
+    // Subtitle container
     const subtitleContainer = document.createElement("div");
-    subtitleContainer.className = "subtitle-container"; // For positioning
-    subtitleContainer.style.position = "relative";
-    subtitleContainer.style.display = "inline-block";
+    subtitleContainer.className = "subtitle-container";
 
     // Subtitle background and text
     const textBackground = document.createElement("div");
@@ -81,9 +79,14 @@ function showSubtitles() {
     // Append to main subtitle box
     subtitleBox.appendChild(subtitleContainer);
 
-    
-
-    document.body.appendChild(subtitleBox);
+    // Insert into YouTube player instead of body
+    const player = document.querySelector('.html5-video-player');
+    if (player) {
+      player.appendChild(subtitleBox);
+    } else {
+      console.warn("YouTube video player not found, falling back to body");
+      document.body.appendChild(subtitleBox);
+    }
 
     // Enable functionality
     enableResize(textBackground, resizeHandle);
@@ -142,15 +145,29 @@ function enableDrag(box, handle) {
 
   handle.addEventListener("mousedown", function (e) {
     isDragging = true;
-    offsetX = e.clientX - box.offsetLeft;
-    offsetY = e.clientY - box.offsetTop;
+    const rect = box.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
     document.body.style.userSelect = "none";
   });
 
   document.addEventListener("mousemove", function (e) {
     if (isDragging) {
-      box.style.left = `${e.clientX - offsetX}px`;
-      box.style.top = `${e.clientY - offsetY}px`;
+      const parent = box.parentElement;
+      const parentRect = parent.getBoundingClientRect();
+
+      let newLeft = e.clientX - offsetX - parentRect.left;
+      let newTop = e.clientY - offsetY - parentRect.top;
+
+      // Clamp to parent bounds
+      const maxLeft = parent.clientWidth - box.offsetWidth;
+      const maxTop = parent.clientHeight - box.offsetHeight;
+
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      box.style.left = `${newLeft}px`;
+      box.style.top = `${newTop}px`;
       box.style.transform = "none";
     }
   });
@@ -162,64 +179,44 @@ function enableDrag(box, handle) {
 }
 
 function enableResize(box, handle) {
-  let isDragging = false;
   let isResizing = false;
-  let dragOffsetX = 0;
-  let dragOffsetY = 0;
-
   const baseWidth = 200;
   const baseFontSize = 16;
 
   box.style.width = `${baseWidth}px`;
   box.style.fontSize = `${baseFontSize}px`;
 
-  // Dragging the box
-  box.addEventListener("mousedown", (e) => {
-    if (e.target === handle) return;
-    isDragging = true;
-    dragOffsetX = e.clientX - box.offsetLeft;
-    dragOffsetY = e.clientY - box.offsetTop;
-    // box.style.cursor = "move";
-  });
-
-  // Resizing
   handle.addEventListener("mousedown", (e) => {
     e.stopPropagation();
     isResizing = true;
+    document.body.style.userSelect = "none";
     box.style.cursor = "se-resize";
   });
 
   document.addEventListener("mousemove", (e) => {
-    if (isDragging) {
-      box.style.left = `${e.clientX - dragOffsetX}px`;
-      box.style.top = `${e.clientY - dragOffsetY}px`;
-      // box.style.cursor = "move";
-    }
+    if (!isResizing) return;
 
-    if (isResizing) {
-      const newWidth = Math.max(
-        e.clientX - box.getBoundingClientRect().left,
-        100
-      );
-      box.style.width = `${newWidth}px`;
+    const container = box.parentElement || document.body;
+    const containerRect = container.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
 
-      const scaleFactor = newWidth / baseWidth;
-      const scaledFont = baseFontSize * scaleFactor;
-      box.style.fontSize = `${scaledFont}px`;
+    let maxWidth = containerRect.right - boxRect.left;
+    let newWidth = Math.max(Math.min(e.clientX - boxRect.left, maxWidth), 100);
+    box.style.width = `${newWidth}px`;
 
-      box.style.cursor = "se-resize";
-    }
+    const scaleFactor = newWidth / baseWidth;
+    const scaledFont = baseFontSize * scaleFactor;
+    box.style.fontSize = `${scaledFont}px`;
   });
 
   document.addEventListener("mouseup", () => {
-    isDragging = false;
     isResizing = false;
     box.style.cursor = "text";
+    document.body.style.userSelect = "auto";
   });
 
-  // Optional: when mouse re-enters the box, set it to text cursor
   box.addEventListener("mouseenter", () => {
-    if (!isDragging && !isResizing) {
+    if (!isResizing) {
       box.style.cursor = "text";
     }
   });
@@ -227,7 +224,6 @@ function enableResize(box, handle) {
 
 function enableHorizontalResize(box, handle) {
   let isResizing = false;
-
   const minWidth = 100;
 
   handle.addEventListener("mousedown", (e) => {
@@ -240,12 +236,13 @@ function enableHorizontalResize(box, handle) {
   document.addEventListener("mousemove", (e) => {
     if (!isResizing) return;
 
-    const newWidth = Math.max(
-      e.clientX - box.getBoundingClientRect().left,
-      minWidth
-    );
+    const container = box.parentElement || document.body;
+    const containerRect = container.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
+
+    let maxWidth = containerRect.right - boxRect.left;
+    let newWidth = Math.max(minWidth, Math.min(e.clientX - boxRect.left, maxWidth));
     box.style.width = `${newWidth}px`;
-    box.style.cursor = "ew-resize";
   });
 
   document.addEventListener("mouseup", () => {
