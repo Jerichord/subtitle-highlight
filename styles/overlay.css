@@ -118,6 +118,11 @@
   /* position: relative;  - not sure why but this was causing not able to select*/ 
 }
 
+.subtitle-container {
+  position: relative;
+  display: inline-block;
+}
+
 #drag-handle,
 #language-select {
   opacity: 0;

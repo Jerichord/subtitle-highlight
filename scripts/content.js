@@ -11,6 +11,7 @@ function showSubtitles() {
     subtitleBox = document.createElement("div");
     subtitleBox.id = "custom-subtitles";
 
+    // Controls wrapper
     const controlsWrapper = document.createElement("div");
     controlsWrapper.id = "subtitle-controls";
 
@@ -22,10 +23,8 @@ function showSubtitles() {
     if (!langSelect) {
       langSelect = document.createElement("select");
       langSelect.id = "language-select";
-      // langSelect.style.margin = "5px";
       langSelect.classList.add("custom-select");
 
-      //Populate only once
       window.youtubeLanguages.forEach((lang) => {
         const option = document.createElement("option");
         option.value = lang.code;
@@ -39,45 +38,62 @@ function showSubtitles() {
       langSelect.addEventListener("change", (e) => {
         const selectedLanguage = e.target.value;
         localStorage.setItem("selectedLanguage", selectedLanguage);
-        // console.log("changed language to ", selectedLanguage)
         fetchAndProcessSubs(null, selectedLanguage);
       });
     }
-    
 
+    // Subtitle container (new)
+    const subtitleContainer = document.createElement("div");
+    subtitleContainer.className = "subtitle-container"; // For positioning
+    subtitleContainer.style.position = "relative";
+    subtitleContainer.style.display = "inline-block";
+
+    // Subtitle background and text
     const textBackground = document.createElement("div");
     textBackground.id = "subtitle-background";
+
     const textContainer = document.createElement("div");
     textContainer.id = "subtitle-text";
+
     const textContainer2 = document.createElement("div");
     textContainer2.id = "subtitle-text-2";
-
-    const resizeHandle = document.createElement("div");
-    resizeHandle.id = "resize-handle";
-    textBackground.appendChild(resizeHandle);
-    enableResize(textBackground, resizeHandle);
-
-    const resizeHandleX = document.createElement("div");
-    resizeHandleX.id = "resize-handle-x"; 
-    textBackground.appendChild(resizeHandleX);
-    enableHorizontalResize(textBackground, resizeHandleX); 
-
-
-    // subtitleBox.appendChild(dragHandle);
-    // subtitleBox.appendChild(langSelect);
-    controlsWrapper.appendChild(dragHandle);
-    controlsWrapper.appendChild(langSelect);
-    subtitleBox.appendChild(controlsWrapper);
-    subtitleBox.appendChild(textBackground);
 
     textBackground.appendChild(textContainer);
     textBackground.appendChild(textContainer2);
 
+    // Resize handles
+    const resizeHandle = document.createElement("div");
+    resizeHandle.id = "resize-handle";
+
+    const resizeHandleX = document.createElement("div");
+    resizeHandleX.id = "resize-handle-x";
+
+    // Append controls
+    controlsWrapper.appendChild(dragHandle);
+    controlsWrapper.appendChild(langSelect);
+    subtitleBox.appendChild(controlsWrapper);
+
+    // Append background + handles to container
+    subtitleContainer.appendChild(textBackground);
+    subtitleContainer.appendChild(resizeHandle);
+    subtitleContainer.appendChild(resizeHandleX);
+
+    // Append to main subtitle box
+    subtitleBox.appendChild(subtitleContainer);
+
+    
+
     document.body.appendChild(subtitleBox);
+
+    // Enable functionality
+    enableResize(textBackground, resizeHandle);
+    enableHorizontalResize(textBackground, resizeHandleX);
     enableDrag(subtitleBox, dragHandle);
   }
+
   subtitleBox.style.display = "block";
 }
+
 
 function hideSubtitles() {
   if (subtitleBox) subtitleBox.style.display = "none";
