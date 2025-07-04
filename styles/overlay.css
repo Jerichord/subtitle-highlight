@@ -164,3 +164,7 @@ background: transparent;
   opacity: 1;
   pointer-events: auto;
 }
+
+.ytp-caption-window-container {
+  display: none !important;
+}

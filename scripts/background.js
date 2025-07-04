@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const tabId = sender.tab.id;
 
       // Case 1: Use previously captured subtitle URL from debugger
-      if (lastTimedTextUrl) {
+      if (lastTimedTextUrl && !request.fromYT) {
         try {
           const urlObj = new URL(lastTimedTextUrl);
           const lang = urlObj.searchParams.get("lang");
@@ -17,8 +17,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           const subs1 = await fetch(urlObj.toString()).then(r => r.json());
           let subs2 = null;
 
-          // Second fetch if needed
-          if (currentLang !== request.selectedLanguage) {
+          // if (currentLang != request.selectedLanguage) {
+          if (!request.selectedLanguage.startsWith(currentLang)) {
             urlObj.searchParams.set("tlang", request.selectedLanguage);
             subs2 = await fetch(urlObj.toString()).then(r => r.json());
           }
@@ -37,7 +37,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
         return;
       }
-
       // Case 2: Fallback — attach debugger and wait for timedtext
       try {
         await chrome.debugger.attach({ tabId }, "1.3");
@@ -63,7 +62,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const subs1 = await fetch(urlObj.toString()).then(r => r.json());
             let subs2 = null;
 
-            if (currentLang !== request.selectedLanguage) {
+            // if (currentLang != request.selectedLanguage) {
+            if (!request.selectedLanguage.startsWith(currentLang)) {
               urlObj.searchParams.set("tlang", request.selectedLanguage);
               subs2 = await fetch(urlObj.toString()).then(r => r.json());
             }

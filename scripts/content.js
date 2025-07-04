@@ -32,13 +32,13 @@ function showSubtitles() {
         langSelect.appendChild(option);
       });
 
-      const savedLang = localStorage.getItem("selectedLanguage") || "en";
-      langSelect.value = savedLang;
+      // const savedLang = localStorage.getItem("selectedLanguage") || "en";
+      langSelect.value = "en";
 
       langSelect.addEventListener("change", (e) => {
         const selectedLanguage = e.target.value;
-        localStorage.setItem("selectedLanguage", selectedLanguage);
-        fetchAndProcessSubs(null, selectedLanguage);
+        // localStorage.setItem("selectedLanguage", selectedLanguage);
+        fetchAndProcessSubs(null, selectedLanguage, false);
       });
     }
 
@@ -261,9 +261,9 @@ function attachSubtitleListeners(video) {
   document.addEventListener("visibilitychange", handler);
 }
 
-function fetchAndProcessSubs(callback, selectedLanguage) {
+function fetchAndProcessSubs(callback, selectedLanguage, fromYT) {
   chrome.runtime.sendMessage(
-    { action: "fetchSubs", selectedLanguage: selectedLanguage },
+    { action: "fetchSubs", selectedLanguage: selectedLanguage, fromYT: fromYT },
     (response) => {
       if (response?.status === "OK") {
         console.log("Request sent to background");
@@ -274,7 +274,6 @@ function fetchAndProcessSubs(callback, selectedLanguage) {
   if (!hasListener) {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (request.action === "processSubs") {
-        // need to add code for second subtitle here
         subtitleData = request.subContent;
         subtitleData2 = request.subContent2 || null;
         const video = document.querySelector("video");
@@ -304,11 +303,11 @@ const checkAndObserve = () => {
         if (isPressed) {
           showSubtitles();
           const langSelect = document.getElementById("language-select");
-          // always fetch to handle sub transition
+          // always fetch to handle sub transition from ads
           const selectedLanguage = langSelect?.value || "en";
           fetchAndProcessSubs(() => {
             showSubtitles();
-          }, selectedLanguage);
+          }, selectedLanguage, true);
         } else {
           hideSubtitles();
         }
