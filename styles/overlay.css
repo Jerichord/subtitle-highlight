@@ -1,34 +1,170 @@
-#dual-subtitle-overlay {
-  text-align: center;
-  max-width: 80%;
+.custom-select {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 16px;
   font-family: sans-serif;
-}
-#primary-subtitle {
-  margin-bottom: 4px;
-  cursor: text;
-  user-select: text;
-}
-#secondary-subtitle {
-  color: yellow;
-  font-size: 18px;
-  cursor: text;
-  user-select: text;
+  max-width: 90vw;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
 }
 
-.subtitle-overlay {
+/* Optional: remove focus outline */
+.custom-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Optional: style dropdown arrow using background image or a pseudo-element */
+.custom-select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-select-wrapper::after {
+  content: '▼';
   position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  color: white;
-  font-size: 24px;
-  padding: 6px 12px;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 10000;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
+  color: white;
+  font-size: 12px;
+}
+
+/* styles.css */
+#custom-subtitles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  position: absolute; /* Changed from fixed */
+  bottom: 10%;          /* Bottom of video frame */
+  left: 50%;           /* Center horizontally */
+  transform: translateX(-50%);
+
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
   user-select: text;
-  font-family: sans-serif;
-  text-align: center;
-  max-width: 80%;
+  z-index: 9999;
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
   cursor: text;
+  text-align: center;
+}
+
+#subtitle-controls {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  /* align-items: center; */
+  gap: 8px;
+}
+
+#drag-handle {
+  cursor: move;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  user-select: none;
+  max-width: 80vw;
+  display: inline-block;
+}
+
+
+#resize-handle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: 0;
+  bottom: 0;
+  cursor: se-resize;
+  z-index: 10;
+  background: transparent;
+  /* background: rgba(0, 255, 0, 0.1);  */
+}
+
+#resize-handle-x {
+  width: 16px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: calc(100% - 16px); 
+  cursor: ew-resize;
+  z-index: 5;
+background: transparent;
+  /* background: rgba(255, 0, 0, 0.1);  */
+}
+
+#subtitle-text {
+  display: inline-block;
+}
+
+#subtitle-background {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 12px;
+  border-radius: 6px;
+  user-select: text;
+  max-width: 90vw;
+  white-space: pre-wrap;
+  color: white;
+  font-size: 16px;
+  display: inline-block;
+  /* position: relative;  - not sure why but this was causing not able to select*/ 
+}
+
+.subtitle-container {
+  position: relative;
+  display: inline-block;
+}
+
+#drag-handle,
+#language-select {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+
+#language-select.custom-select {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  border: none;
+  color: white;
+  font-family: sans-serif;
+  appearance: none;
+  /* margin-left: 3px; */
+  margin-bottom: 6px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+#language-select option {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 14px;
+  padding: 6px 10px;
+  font-family: sans-serif;
+}
+
+#custom-subtitles:hover #drag-handle,
+#custom-subtitles:hover #language-select {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ytp-caption-window-container {
+  display: none !important;
 }
