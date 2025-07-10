@@ -80,7 +80,7 @@ function showSubtitles() {
     subtitleBox.appendChild(subtitleContainer);
 
     // Insert into YouTube player instead of body
-    const player = document.querySelector('.html5-video-player');
+    const player = document.querySelector(".html5-video-player");
     if (player) {
       player.appendChild(subtitleBox);
     } else {
@@ -92,11 +92,39 @@ function showSubtitles() {
     enableResize(textBackground, resizeHandle);
     enableHorizontalResize(textBackground, resizeHandleX);
     enableDrag(subtitleBox, dragHandle);
+    positionSubtitlesAtBottom(subtitleBox);
   }
 
   subtitleBox.style.display = "block";
 }
 
+function positionSubtitlesAtBottom(subtitleBox) {
+  const video = document.querySelector('video');
+  if (!video || !subtitleBox) return;
+
+  const videoRect = video.getBoundingClientRect();
+
+  const boxHeight = subtitleBox.offsetHeight;
+
+  // Bottom offset as % of video height
+  const bottomOffsetPercent = 35;
+  const bottomOffsetPx = (bottomOffsetPercent / 100) * videoRect.height;
+
+  // Vertically position: video top + height - bottom offset - subtitle height
+  const top = videoRect.top + videoRect.height - bottomOffsetPx - boxHeight;
+
+  // Horizontally center: left at video left + half width (50%)
+  const leftPercent = 50; // 50% horizontally inside the video
+
+  // Set left to video left + 50% of video width (as pixels)
+  const leftPx = (videoRect.width * leftPercent / 100);
+
+  subtitleBox.style.top = `${top}px`;
+  subtitleBox.style.left = `${leftPx}px`;
+
+  // transform subtitleBox for horizontal centering
+  subtitleBox.style.transform = 'translateX(-50%)';
+}
 
 function hideSubtitles() {
   if (subtitleBox) subtitleBox.style.display = "none";
@@ -121,19 +149,25 @@ function updateSubtitle(video) {
   const textContainer = subtitleBox?.querySelector("#subtitle-text");
   const textContainer2 = subtitleBox?.querySelector("#subtitle-text-2");
 
-  if (match && match !== activeSub && textContainer) {
-    textContainer.innerText = match.segs.map((s) => s.utf8).join("");
-    activeSub = match;
-  } else if (!match && activeSub !== null && textContainer) {
-    textContainer.innerText = "";
-    activeSub = null;
-  }
+  if (match && match !== activeSub) {
+      const subtitleText = match.segs.map((s) => s.utf8).join("").trim();
+      textContainer.innerText = subtitleText;
+      subtitleBox.style.display = subtitleText ? "block" : "none";
+      activeSub = match;
+    } else if (!match && activeSub !== null) {
+      textContainer.innerText = "";
+      subtitleBox.style.display = "none";
+      activeSub = null;
+    }
 
-  if (match2 && match2 !== activeSub2 && textContainer2) {
-    textContainer2.innerText = match2.segs?.map((s) => s.utf8).join("") || "";
+  if (match2 && match2 !== activeSub2) {
+    const subtitleText2 = match2.segs?.map((s) => s.utf8).join("").trim();
+    textContainer2.innerText = subtitleText2;
+    subtitleBox.style.display = subtitleText2 ? "block" : "none";
     activeSub2 = match2;
-  } else if (!match2 && activeSub2 !== null && textContainer2) {
+  } else if (!match2 && activeSub2 !== null) {
     textContainer2.innerText = "";
+    subtitleBox.style.display = "none";
     activeSub2 = null;
   }
 }
@@ -241,7 +275,10 @@ function enableHorizontalResize(box, handle) {
     const boxRect = box.getBoundingClientRect();
 
     let maxWidth = containerRect.right - boxRect.left;
-    let newWidth = Math.max(minWidth, Math.min(e.clientX - boxRect.left, maxWidth));
+    let newWidth = Math.max(
+      minWidth,
+      Math.min(e.clientX - boxRect.left, maxWidth)
+    );
     box.style.width = `${newWidth}px`;
   });
 
@@ -305,9 +342,13 @@ const checkAndObserve = () => {
           const langSelect = document.getElementById("language-select");
           // always fetch to handle sub transition from ads
           const selectedLanguage = langSelect?.value || "en";
-          fetchAndProcessSubs(() => {
-            showSubtitles();
-          }, selectedLanguage, true);
+          fetchAndProcessSubs(
+            () => {
+              showSubtitles();
+            },
+            selectedLanguage,
+            true
+          );
         } else {
           hideSubtitles();
         }
@@ -319,7 +360,3 @@ const checkAndObserve = () => {
 };
 
 checkAndObserve();
-
-
-
-
