@@ -3,7 +3,7 @@
   "name": "Subtitle Highlighter",
   "version": "1.0",
   "description": "Allow highlighting for copy/paste.",
-  "permissions": ["scripting", "activeTab", "storage", "debugger", "tabs"],
+  "permissions": ["scripting", "debugger", "tabs"],
   "host_permissions": ["https://www.youtube.com/*"],
   "background": {
     "service_worker": "scripts/background.js"

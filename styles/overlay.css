@@ -61,8 +61,6 @@
 #subtitle-controls {
   display: flex;
   flex-direction: row;
-  /* justify-content: center; */
-  /* align-items: center; */
   gap: 8px;
 }
 
@@ -88,7 +86,6 @@
   cursor: se-resize;
   z-index: 10;
   background: transparent;
-  /* background: rgba(0, 255, 0, 0.1);  */
 }
 
 #resize-handle-x {
@@ -100,8 +97,7 @@
   height: calc(100% - 16px); 
   cursor: ew-resize;
   z-index: 5;
-background: transparent;
-  /* background: rgba(255, 0, 0, 0.1);  */
+  background: transparent;
 }
 
 #subtitle-text {
@@ -119,7 +115,6 @@ background: transparent;
   font-size: 16px;
   display: inline-block;
   pointer-events: auto;
-  /* position: relative;  - not sure why but this was causing not able to select*/ 
 }
 
 .subtitle-container {
@@ -146,7 +141,6 @@ background: transparent;
   color: white;
   font-family: sans-serif;
   appearance: none;
-  /* margin-left: 3px; */
   margin-bottom: 6px;
   -webkit-appearance: none;
   -moz-appearance: none;
