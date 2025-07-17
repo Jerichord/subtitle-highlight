@@ -152,22 +152,18 @@ function updateSubtitle(video) {
   if (match && match !== activeSub) {
       const subtitleText = match.segs.map((s) => s.utf8).join("").trim();
       textContainer.innerText = subtitleText;
-      subtitleBox.style.display = subtitleText ? "block" : "none";
+      subtitleBox.style.display = subtitleText // ? "block" : "none";
       activeSub = match;
     } else if (!match && activeSub !== null) {
-      textContainer.innerText = "";
-      subtitleBox.style.display = "none";
       activeSub = null;
     }
 
   if (match2 && match2 !== activeSub2) {
     const subtitleText2 = match2.segs?.map((s) => s.utf8).join("").trim();
     textContainer2.innerText = subtitleText2;
-    subtitleBox.style.display = subtitleText2 ? "block" : "none";
+    subtitleBox.style.display = subtitleText2//  ? "block" : "none";
     activeSub2 = match2;
   } else if (!match2 && activeSub2 !== null) {
-    textContainer2.innerText = "";
-    subtitleBox.style.display = "none";
     activeSub2 = null;
   }
 }
