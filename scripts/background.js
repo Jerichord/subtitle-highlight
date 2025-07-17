@@ -62,7 +62,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const subs1 = await fetch(urlObj.toString()).then(r => r.json());
             let subs2 = null;
 
-            // if (currentLang != request.selectedLanguage) {
             if (!request.selectedLanguage.startsWith(currentLang)) {
               urlObj.searchParams.set("tlang", request.selectedLanguage);
               subs2 = await fetch(urlObj.toString()).then(r => r.json());
